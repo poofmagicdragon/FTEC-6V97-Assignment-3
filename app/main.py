@@ -1,10 +1,18 @@
 # ...
-from app.domain.User import User # from domain package and user module, import user class
-from app.cli.menu_printer import print_menu
-from app.cli import constants
+# from app.domain.User import User # from domain package and user module, import user class
+# from app.cli.menu_printer import print_menu
+# from app.cli import constants
 
-print_menu(constants.LOGIN_MENU)
+# print_menu(constants.LOGIN_MENU)
 
+
+
+# app/main.py
+from app import create_app # import the create_app function that creates a flask application from the app pacakge.
+from app.config import Config
+app=create_app(Config)
+if __name__=="__main__": # this checks whether this module is executed directly.
+    app.run()
 
 
 # from database import get_session

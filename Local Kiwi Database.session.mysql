@@ -69,5 +69,7 @@
 
 -- SELECT * FROM security;
 
-DELETE FROM investment;
+
+DELETE FROM investment where investment.id = 8;
+
 
