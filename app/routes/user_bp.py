@@ -19,16 +19,18 @@ def get_all_users_route():
             "balance": u.balance
         } for u in users]
 
-        return {"users": output}, 201
+        return {"users": output}, 200
     except Exception as e:
-        return {"error": e}, 400
+        return {"error": str(e)}, 500
 
 # 2.
 @user_bp.route('/get_user_by_id/<username>', methods = ['GET'])
 def get_user_by_id_route(username):
     try:
         user = get_user_by_username(username, db.session)
-
+        if user is None:
+            return {"error": f"User '{username}' not found"}, 404
+        
         output = [{
             "username": user.username,
             "firstname": user.firstname,
@@ -36,9 +38,9 @@ def get_user_by_id_route(username):
             "password": user.password,
             "balance": user.balance
         }]
-        return {"user": output}, 201
+        return {"user": output}, 200
     except Exception as e:
-        return {"error": e}, 400
+        return {"error": str(e)}, 500
     
 # 3.
 @user_bp.route('/create_user', methods = ['POST'])
@@ -55,15 +57,22 @@ def create_user_route():
 
         message = create_user(db.session, user_dict)
         return {"message": message}, 201
+    except ValueError as e:
+        return {"error": str(e)}, 400
     except Exception as e:
-        return {"error": e}, 400
+        return{"error": str(e)}, 500
 
 # 4.
 @user_bp.route('/delete_user/<username>', methods = ['DELETE'])
 def delete_user_route(username):
     try:
         message = delete_user(db.session, username)
-        return {"message": message}, 201
+        return {"message": message}, 200
+    except LookupError as e:
+        return {"error": str(e)}, 404  
+    except PermissionError as e:
+        return {"error": str(e)}, 403 
     except Exception as e:
-        return {"error": e}, 400
+        return {"error": str(e)}, 500
+
 

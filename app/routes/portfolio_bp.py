@@ -17,10 +17,14 @@ def create_portfolio_route():
         owner = data.get('owner')
         investment_strategy = data.get('investment_strategy')
 
-        message = create_portfolio(owner, name, description, investment_strategy)
+        message = create_portfolio(owner, db.session, name, description, investment_strategy)
         return {"message": message}, 201
-    except Exception as e:
+    
+    except ValueError as e:
         return {"error": str(e)}, 400
+    
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 # 2.     
 @portfolio_bp.route('/get_all_portfolios', methods = ['GET'])
@@ -36,33 +40,42 @@ def get_all_portfolios_route():
             "investment":p.investment_strategy
         } for p in portfolios]
 
-        return {"portfolios": output}, 201
+        return {"portfolios": output}, 200
+    
     except Exception as e:
-        return {"error": str(e)}, 400
+        return {"error": str(e)}, 500
+    
 
 # 3. 
 @portfolio_bp.route('/get_portfolio_by_id/<int:portfolio_id>', methods = ['GET'])
 def get_portfolio_by_id_route(portfolio_id):    
     try:
         portfolio = get_portfolio_by_id(db.session, portfolio_id)
+        if portfolio is None:
+            return {"error": f"Portfolio {portfolio_id} not found"}, 404
+
         output = {            
             "id":portfolio.id,
             "owner":portfolio.owner,
             "name":portfolio.name,
             "description":portfolio.description,
             "investment":portfolio.investment_strategy}
-        return {"portfolio": output}, 201
+        return {"portfolio": output}, 200
     except Exception as e:
-        return {"error": str(e)}, 400
+        return {"error": str(e)}, 500 
 
 # 4.
 @portfolio_bp.route('/delete_portfolio/<portfolio_name>/<user_name>', methods = ['DELETE'])
 def delete_portfolio_route(portfolio_name, user_name):
     try:
         message = delete_portfolio(db.session, portfolio_name, user_name)
-        return {"message": message}, 201
+        return {"message": message}, 200
+    except PermissionError as e:
+        return {"error": str(e)}, 403
+    except LookupError as e:
+        return {"error": str(e)}, 404
     except Exception as e:
-        return {"error": str(e)}, 400
+        return {"error": str(e)}, 500
 
 # 5.
 @portfolio_bp.route('/add_security_to_portfolio/<int:portfolio_id>', methods=['POST'])
@@ -79,9 +92,10 @@ def add_security_to_portfolio_route(portfolio_id):
 
         message = create_purchase_order(db.session, user.username, portfolio_id, ticker.upper(), quantity_to_buy, user.balance)
         return {"message": message}, 201
-
-    except Exception as e:
+    except ValueError as e:
         return {"error": str(e)}, 400
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 # 6.
 @portfolio_bp.route('/harvest_investment/<int:portfolio_id>', methods = ['POST'])
@@ -98,7 +112,9 @@ def harvest_investment_route(portfolio_id):
             return {"error": f"User '{username}' not found"}, 404
         
         message = harvest_investment(db.session, user.username, portfolio_id, ticker, quantity_to_sell, sell_price, user.balance)
-        return{"message": message}, 201
-    except Exception as e:
+        return{"message": message}, 200 # technically an update not a creation
+    except ValueError as e:
         return {"error": str(e)}, 400        
+    except Exception as e:
+        return {"error": str(e)}, 500       
 

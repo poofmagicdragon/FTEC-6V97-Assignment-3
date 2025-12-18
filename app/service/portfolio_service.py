@@ -31,10 +31,9 @@ class UnsupportedUserOperationError(Exception):
 #     finally:
 #         session.close()
 
-def create_portfolio(owner: str, name: str, description: str, investment_strategy: str) -> str:
+def create_portfolio(owner: str, session: Session,name: str, description: str, investment_strategy: str) -> str:
     portfolio = Portfolio(owner = owner, name = name, description = description, investment_strategy = investment_strategy)
     try:
-        session = db.session
         session.add(portfolio)
         session.commit()
         return f"Portfolio {name} created successfully"

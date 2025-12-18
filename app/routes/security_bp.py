@@ -15,6 +15,6 @@ def get_all_securities_route():
             "price": s.price
         } for s in securities]
 
-        return {"securities": output}, 201
+        return {"securities": output}, 200
     except Exception as e:
-        return {"error": str(e)}, 400
+        return {"error": str(e)}, 500
