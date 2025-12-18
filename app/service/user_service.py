@@ -104,10 +104,14 @@ def delete_user(session: Session, username: str) -> str:
         raise UnsupportedUserOperationError(f"User {username} has existing dependencies and cannot be deleted")
 
 def update_user_balance(session: Session, username: str, new_balance: float) -> str:
-    user = get_user_by_username(username, session)
-    user.balance = new_balance
-    session.commit()
-    return f"User {username}'s balance updated successfully to {new_balance}"
+    try:
+        user = get_user_by_username(username, session)
+        user.balance = new_balance
+        session.commit()
+        return f"User {username}'s balance updated successfully to {new_balance}"
+        
+    finally:
+        session.close()
 
 
 

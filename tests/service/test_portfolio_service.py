@@ -44,7 +44,7 @@ def test_get_portfolio_by_name(db_session):
     test_portfolio = Portfolio(owner="Y", name="portfolio y", description="desc", investment_strategy="growth")
     db_session.add(test_portfolio)
 
-    portfolio = get_portfolio_by_name("portfolio y", db_session)
+    portfolio = get_portfolio_by_name("portfolio y", db_session, owner = "Y")
 
     assert portfolio is not None
     assert portfolio.name == "portfolio y"
@@ -120,7 +120,7 @@ def test_delete_portfolio_existing_dependency(db_session):
     with pytest.raises(UnsupportedUserOperationError) as exc_info:
         delete_portfolio(db_session, "Test Portfolio")
     
-    assert str(exc_info.value) == "Portfolio 'Test Portfolio' has existing dependencies and cannot be deleted"
+    assert str(exc_info.value) == "Portfolio 'Test Portfolio' still has active investments and cannot be deleted"
 
 def test_get_all_portfolio_logged_in_user(monkeypatch, db_session):
     test_user = User(username="X", firstname="First", lastname="Last", password="Y", balance=100.1)
